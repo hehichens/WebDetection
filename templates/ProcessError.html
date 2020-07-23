@@ -1,9 +1,50 @@
 {% extends 'base.html' %}
+{% block style %}
+    <link rel="stylesheet"  href="{{url_for('static', filename='css/test.css')}}"/>
+{% endblock %}
+
+{% block js %}
+    <script src="{{ url_for('static', filename='js/jquery-3.3.1.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/particle-bg.umd.min.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@1.11.3"></script>
+    <script src="https://cdn.jsdelivr.net/gh/ajlkn/skel@3.0.1/dist/skel.min.js"></script>
+    <script src="{{url_for('static', filename='js/main.js')}}"></script>
+    <script src="{{url_for('static', filename='js/util.js')}}"></script>
+{% endblock %}
 
 {% block content %}
 
-    <h2>SomeThing went wrong !</h2>
-    <nav id="header">
-            <a href="../#2"><input class="btn" type="button" name="Try Again" value="Try Again"/></a>
-    </nav>
+<div id="wrapper">
+    <!--首页开始-->
+    <header id="header">
+{#        <div class="logo">#}
+{#            <span class="icon fa-rocket"></span>#}
+{#        </div>#}
+        <div class="content">
+            <div class="inner">
+                <h2>出现错误了！</h2>
+                <h3 >请试试以下办法:</h3>
+                <ul style="text-align: left">
+                    <li>注意检测时候出现的框，可以适当离镜头近一点。</li>
+                    <li>可以到一个光线较好的环境进行检测。</li>
+                    <li>还有不要摇晃的太厉害哦，亲~</li>
+                </ul>
+                <p style="font-family: STFangsong; font-size:14px; text-align: left">我们非常抱歉！</p>
+            </div>
+            <nav id="header">
+                <a href="../#2"><input class="btn" type="button" name="Try Again" value="Try Again"/></a>
+            </nav>
+            <p></p><p></p>
+        </div>
+
+
+    </header>
+    <!--首页结束-->
+    <!-- 版权底部 -->
+    <footer id="footer">
+        <p class="copyright">&copy;2020 你的头发还好吗</p>
+    </footer>
+    <!-- 版权结束 -->
 {% endblock %}
