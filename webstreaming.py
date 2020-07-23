@@ -45,6 +45,29 @@ Xrelative = []
 Yrelative = []
 cosValue = []
 
+# result standard data
+inx  = 0
+RiskDegree = [r'无斜视风险',
+              r'有斜视风险，　建议去医院进一步检查！',
+              r'斜视风险非常高，建议去医院进一步检查！',
+]
+Standard_max_Xrelative = 0.73
+Standard_min_Xrelative = 0.65
+Standard_avg_Xrelative = 0.7
+
+Standard_max_Yrelative = 0.09
+Standard_min_Yrelative = 0.03
+Standard_avg_Yrelative = 0.05
+
+Standard_S_x = 0.0218
+Standard_S_y = 0.011
+Standard_S_xy = 0.0226
+
+Standard_max_cosValue = 1
+Standard_min_cosValue = 0.5
+Standard_avg_cosValue = 0.76
+
+
 # video="http://admin:admin@192.168.43.1:8081/"   #此处@后的ipv4 地址需要修改为自己的地址
 video = 0
 # "/home/hichens/Datasets/xieshi/lj.mp4"
@@ -98,9 +121,10 @@ def result():
         max_Xrelative, min_Xrelative, avg_Xrelative = max(Xrelative), min(Xrelative), np.mean(Xrelative)
         max_Yrelative, min_Yrelative, avg_Yrelative = max(Yrelative), min(Yrelative), np.mean(Yrelative)
         plt.plot(XX, Xrelative, label='X relative')
-        plt.plot(XX, [avg_Xrelative] * N, '-')
-        plt.plot(XX, [max_Xrelative] * N, '--')
-        plt.plot(XX, [min_Xrelative] * N, '--')
+        plt.plot(XX, [avg_Xrelative] * N, '-', label='X relative average')
+        plt.plot(XX, [Standard_avg_Xrelative]*N, '-', label="reference average")
+        plt.plot(XX, [Standard_max_Xrelative] * N, '--')
+        plt.plot(XX, [Standard_min_Xrelative] * N, '--')
         plt.legend()
 
         '''figure 2 show the y relative position, incluce min, max,   avg '''
@@ -109,9 +133,10 @@ def result():
         N = len(Yrelative)
         XX = range(N)
         plt.plot(XX, Yrelative, label='Y relative')
-        plt.plot(XX, [max_Yrelative] * N, '--')
-        plt.plot(XX, [min_Yrelative] * N, '--')
-        plt.plot(XX, [avg_Yrelative] * N, '-')
+        plt.plot(XX, [Standard_max_Yrelative] * N, '--')
+        plt.plot(XX, [Standard_min_Yrelative] * N, '--')
+        plt.plot(XX, [avg_Yrelative] * N, '-', label='Y relative average')
+        plt.plot(XX, [Standard_avg_Yrelative]*N, '-', label="reference average")
         plt.legend()
 
         '''figure 3 show the S value'''
@@ -121,7 +146,10 @@ def result():
         S_y = np.std(Yrelative)
         S_xy = np.sqrt(S_x * S_x + S_y * S_y)
         S = [S_x, S_y, S_xy]
-        plt.bar(range(3), S)
+        Standad_S = [Standard_S_x, Standard_S_y, Standard_S_xy]
+        plt.bar(range(3), S, label='S')
+        plt.bar(range(3), Standad_S, label = 'Standard')
+        plt.legend()
         plt.xticks(range(3), ['S_x', 'S_y', 'S_xy'])
 
         '''figure 4 show the cosine relative value '''
@@ -133,19 +161,41 @@ def result():
         N = len(cosValue)
         XX = range(N)
         plt.plot(XX, cosValue, '-o', label='cosine relative value')
-        plt.plot(XX, [max_cos] * N, '--')
-        plt.plot(XX, [min_cos] * N, '--')
-        plt.plot(XX, [avg_cos] * N, '-')
+        plt.plot(XX, [Standard_max_cosValue] * N, '--')
+        plt.plot(XX, [Standard_min_cosValue] * N, '--')
+        plt.plot(XX, [avg_cos] * N, '-', label='cosine average value')
+        plt.plot(XX, [Standard_avg_cosValue]*N, '-', label="reference average")
         plt.legend()
 
         plt.show()
         fig.savefig(path, dpi=100)
         print("here")
+
+        global inx
+        inx = 0
+        if max_Xrelative > Standard_max_Xrelative:
+            inx += 1
+        if min_Xrelative < Standard_min_Xrelative:
+            inx += 1
+        if avg_Xrelative  < Standard_avg_Xrelative - S_x  or  avg_Xrelative  > Standard_avg_Xrelative + S_x:
+            inx += 3
+        if max_Yrelative > Standard_max_Yrelative:
+            inx += 1
+        if min_Yrelative < Standard_min_Yrelative:
+            inx += 1
+        if avg_Yrelative  < Standard_avg_Yrelative - S_x  or  avg_Yrelative  > Standard_avg_Yrelative + S_y:
+            inx += 3
+        if avg_cos < Standard_min_cosValue:
+            inx += 10
+
+        inx //= 7
+        # inx = min(inx, 2)
+
     except:
-        print("rederect")
         return redirect(url_for('ProcessError'))
     else:
-        print("go on")
+        print(inx)
+        print(RiskDegree[inx])
         data = {
             '水平相对移动最大移动值': round(max_Xrelative, 2),
             '水平相对移动最小移动值': round(min_Xrelative, 2),
@@ -160,7 +210,8 @@ def result():
 
             '最大余弦相似值': round(max_cos, 4),
             '最小余弦相似值': round(min_cos, 4),
-            '平均余弦相似值': round(avg_cos, 4)
+            '平均余弦相似值': round(avg_cos, 4),
+            '诊断结果': RiskDegree[inx]
         }
         return render_template("result.html", data=data)
 
