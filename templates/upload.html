@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang = "en">
+    <head>
+        <meta charset="UTF-8">
+        <title>检测方式</title>
+    </head>
+    <center>
+        <h1>
+            选择你的检测方式
+        </h1>
+    </center>
+    <div>
+        <form action="/videoprocess" method="post" enctype="multipart/form-data" >
+            　　　<input type="file" name= "file"  /> <br />
+            　　　<input type="submit" value="upload"  />
+        </form>
+    </div>
+
+
+    <p>
+        <form method="get" action="/main">
+            <button type="submit">使用计算机摄像头检测</button>
+        </form>
+    </p>
+</html>

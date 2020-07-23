@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+
+{% block style %}
+    <link rel="stylesheet"  href="{{url_for('static', filename='css/test.css')}}"/>
+
+{% endblock %}
+{% block js %}
+    <script src="{{ url_for('static', filename='js/jquery-3.3.1.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/particle-bg.umd.min.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@1.11.3"></script>
+    <script src="https://cdn.jsdelivr.net/gh/ajlkn/skel@3.0.1/dist/skel.min.js"></script>
+    <script src="{{url_for('static', filename='js/main.js')}}"></script>
+    <script src="{{url_for('static', filename='js/util.js')}}"></script>
+
+    <script>
+        $(function () {
+            $(window).load(function () {
+                NProgress.done();
+            });
+            NProgress.set(0.0);
+            NProgress.configure({showSpinner: false});
+            NProgress.configure({minimum: 0.4});
+            NProgress.configure({easing: 'ease', speed: 1200});
+            NProgress.configure({trickleSpeed: 200});
+            NProgress.configure({trickleRate: 0.2, trickleSpeed: 1200});
+            NProgress.inc();
+            $(window).ready(function () {
+                NProgress.start();
+            });
+        });
+
+            window.addEventListener('load', () => {
+            fetch('https://api.ly522.com/yan.php?format=json', {
+                method: 'GET',
+            }).then((response) => {
+                return response.json();
+            }).then((r) => {
+                insertHitokoto(r);
+            })
+        });
+
+        function insertHitokoto(data) {
+            let hitokoto = document.getElementById('lwlhitokoto');
+            if (data.author || data.source) {
+                hitokoto.innerHTML = `${data.text} —— ${data.author} ${data.source}`;
+            } else {
+                hitokoto.innerHTML = `${data.text}`;
+            }
+        }
+    </script>
+{% endblock %}
+{% block content %}
+
+    <div>
+        <div style="margin: auto; text-align: center;">
+            <h1>结果分析</h1>
+            <p></p><p></p>
+            <div style="display:flex; justify-content: flex-end; align-item: flex-start;align-content:center; ">
+                <div style="margin: auto; text-align: center; display: inline-block;">
+                    <h2>检测结果表</h2>
+                    <img src="{{ url_for('static', filename="images/result.png")}}" style="width: 60%; ">
+                </div>
+
+                <table frame="void" style=" width: 30%" align="center">
+                    <tr frame="void">
+                        <td><h3>斜视统计数据</h3></td>
+                    </tr>
+                    {% for n, d in data.items() %}
+                        <tr >
+                            <td style="font-family: STFangsong; mso-callipering: 0;">
+                                {{ n }}:  {{ d }}
+                            </td>
+                        </tr>
+                   {% endfor %}
+                </table>
+            </div>
+        </div>
+    </div>
+    <p></p><p></p><p></p>
+       <nav id="header">
+            <a href="../#2"><input class="btn" type="button" name="Try Again" value="Try Again"/></a>
+       </nav>
+    <footer id="footer">
+        <p class="copyright">&copy;2020 你的头发还好吗</p>
+    </footer>
+
+{% endblock %}
+
