@@ -34,9 +34,8 @@ warnings.filterwarnings("ignore")
 outputFrame = None
 lock = threading.Lock()
 app = Flask(__name__)
-app.config['SEND_FILE_MAX_AGE_DEFAULT'] = datetime.timedelta(seconds=0)
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
-
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = datetime.timedelta(seconds=1) # file refresh time
+app.config['MAX_CONTENT_LENGTH'] = 160 * 1024 * 1024 # maximum file  <= 160MB
 flag = False # control the camera
 filename = ''
 
@@ -47,30 +46,34 @@ cosValue = []
 
 # result standard data
 inx  = 0
-RiskDegree = [r'无斜视风险',
-              r'有斜视风险，　建议去医院进一步检查！',
+RiskDegree = [r'无斜视风险.',
+              r'有斜视风险，建议去医院进一步检查!',
               r'斜视风险非常高，建议去医院进一步检查！',
 ]
+
 Standard_max_Xrelative = 0.73
-Standard_min_Xrelative = 0.65
+Standard_min_Xrelative = 0.67
 Standard_avg_Xrelative = 0.7
 
-Standard_max_Yrelative = 0.09
-Standard_min_Yrelative = 0.03
-Standard_avg_Yrelative = 0.05
+Standard_max_Yrelative = 0.06
+Standard_min_Yrelative = 0.016
+Standard_avg_Yrelative = 0.03
 
-Standard_S_x = 0.0218
-Standard_S_y = 0.011
-Standard_S_xy = 0.0226
+Standard_S_x = 0.0155
+Standard_S_y = 0.085
+Standard_S_xy = 0.0189
 
 Standard_max_cosValue = 1
 Standard_min_cosValue = 0.5
-Standard_avg_cosValue = 0.76
+Standard_avg_cosValue = 0.65
 
 
-# video="http://admin:admin@192.168.43.1:8081/"   #此处@后的ipv4 地址需要修改为自己的地址
-video = 0
 # "/home/hichens/Datasets/xieshi/lj.mp4"
+# "http://admin:admin@192.168.43.1:8081/"   #此处@后的ipv4 地址需要修改为自己的地址
+# 0
+source = 0 # filename, phone camera, computer camera
+video= source
+
 
 
 @app.route("/index")
@@ -147,8 +150,10 @@ def result():
         S_xy = np.sqrt(S_x * S_x + S_y * S_y)
         S = [S_x, S_y, S_xy]
         Standad_S = [Standard_S_x, Standard_S_y, Standard_S_xy]
-        plt.bar(range(3), S, label='S')
-        plt.bar(range(3), Standad_S, label = 'Standard')
+        XX = np.arange(3)
+        width = 0.4
+        plt.bar(XX, S, width=width, label='S')
+        plt.bar(XX + width, Standad_S, width=0.4, label='Standard')
         plt.legend()
         plt.xticks(range(3), ['S_x', 'S_y', 'S_xy'])
 
@@ -197,23 +202,24 @@ def result():
         print(inx)
         print(RiskDegree[inx])
         data = {
-            '水平相对移动最大移动值': round(max_Xrelative, 2),
-            '水平相对移动最小移动值': round(min_Xrelative, 2),
-            '水平相对移动平均移动值': round(avg_Xrelative, 2),
-            '竖直相对移动最大移动值': round(max_Yrelative, 2),
-            '竖直相对移动最小移动值': round(min_Yrelative, 2),
-            '竖直相对移动平均移动值': round(avg_Yrelative, 2),
+            '水平相对移动最大移动值': [round(max_Xrelative, 2), Standard_max_Xrelative],
+            '水平相对移动最小移动值': [round(min_Xrelative, 2), Standard_min_Xrelative],
+            '水平相对移动平均移动值': [round(avg_Xrelative, 2), Standard_avg_Xrelative],
+            '竖直相对移动最大移动值': [round(max_Yrelative, 2), Standard_max_Yrelative],
+            '竖直相对移动最小移动值': [round(min_Yrelative, 2), Standard_min_Yrelative],
+            '竖直相对移动平均移动值': [round(avg_Yrelative, 2), Standard_avg_Yrelative],
 
-            '水平相对移动方差值': round(S_x, 4),
-            '竖直相对移动方差值': round(S_y, 4),
-            '综合相对移动方差值': round(S_xy, 4),
+            '水平相对移动方差值': [round(S_x, 4), Standard_S_x],
+            '竖直相对移动方差值': [round(S_y, 4), Standard_S_y],
+            '综合相对移动方差值': [round(S_xy, 4), Standard_S_xy],
 
-            '最大余弦相似值': round(max_cos, 4),
-            '最小余弦相似值': round(min_cos, 4),
-            '平均余弦相似值': round(avg_cos, 4),
-            '诊断结果': RiskDegree[inx]
+            '最大余弦相似值': [round(max_cos, 4), Standard_max_cosValue],
+            '最小余弦相似值': [round(min_cos, 4), Standard_min_cosValue],
+            '平均余弦相似值': [round(avg_cos, 4), Standard_avg_cosValue]
+
         }
-        return render_template("result.html", data=data)
+        Result = [RiskDegree[inx], inx]
+        return render_template("result.html", data=data, Result=Result)
 
 
 def detect():
@@ -301,7 +307,7 @@ def upload_file():
 def camerapage():
     global video
     if request.method == 'POST':
-        video = 0
+        video = source
         return redirect(url_for('main'))
 
 

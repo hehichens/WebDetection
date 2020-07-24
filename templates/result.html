@@ -70,11 +70,19 @@
                     {% for n, d in data.items() %}
                         <tr >
                             <td style="font-family: STFangsong; mso-callipering: 0;">
-                                {{ n }}:  {{ d }}
+                                {{ n }}:  {{ d[0] }}(参考值:{{ d[1] }})
                             </td>
                         </tr>
                    {% endfor %}
                 </table>
+
+            </div>
+            <div style="border: 2px solid ; border-radius: 25px; width: 46%;margin:auto;text-align: center;padding-top: 1%">
+                {% if Result[1] == 0 %}
+                    <h2>{{ Result[0] }}</h2>
+                {% else %}
+                    <h2 style="color: #f5840b">{{ Result[0] }}</h2>
+                {% endif %}
             </div>
         </div>
     </div>
